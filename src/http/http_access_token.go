@@ -4,8 +4,9 @@ import (
 	"net/http"
 	// "strings"
 	"github.com/gin-gonic/gin"
-	"github.com/selvamshan/bookstore_oauth-api/src/domain/access_token"
-	"github.com/selvamshan/bookstore_oauth-api/src/utils/errors"
+	atDomain "github.com/selvamshan/bookstore_oauth-api/src/domain/access_token"
+	"github.com/selvamshan/bookstore_oauth-api/src/services/access_token"
+	"github.com/selvamshan/bookstore_utils-go/rest_errors"
 )
 
 type AccessTokenHandler interface {
@@ -28,7 +29,7 @@ func (handler *accessTokenHandler) GetById(c *gin.Context) {
 	accessTokenId := c.Param("access_token_id")
 	accessToken, err := handler.service.GetById(accessTokenId)
 	if err != nil {
-		c.JSON(err.Status, err)
+		c.JSON(err.Status(), err)
 		return
 	}
 	c.JSON(http.StatusOK, accessToken)
@@ -36,15 +37,17 @@ func (handler *accessTokenHandler) GetById(c *gin.Context) {
 
 
 func (handler *accessTokenHandler) Create(c *gin.Context) {
-	var at access_token.AccessToken
-	if err := c.ShouldBindJSON(&at); err != nil {
-		restErr := errors.NewBadRequestError("invalid json body")
-		c.JSON(restErr.Status, restErr)
+	var atr atDomain.AccessTokenRequest
+	if err := c.ShouldBindJSON(&atr); err != nil {
+		restErr := rest_errors.NewBadRequestError("invalid json body")
+		c.JSON(restErr.Status(), restErr)
 		return
 	}
 
-	if err := handler.service.Create(&at); err != nil {
-		c.JSON(err.Status, err)
+	at, err := handler.service.Create(&atr);
+	if err != nil {
+
+		c.JSON(err.Status(), err.Error())
 		return
 	}
 
