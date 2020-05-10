@@ -4,6 +4,7 @@ import (
 	"time"
 	"encoding/json"
 	"errors"
+	//"fmt"
 	//_"github.com/mercadolibre/golang-restclient"
 	"github.com/mercadolibre/golang-restclient/rest"
 	"github.com/selvamshan/bookstore_utils-go/rest_errors"
@@ -33,13 +34,14 @@ func (r *usersRepository) LoginUser(email string, password string) (*users.User,
 		Email: email,
 		Password: password,
 	}
+	
 	response := usersRestClient.Post("/users/login", request)
+	//fmt.Println("in user_repository line 39",response.String(), response.StatusCode)
 	if response == nil || response.Response == nil {
 		return nil, rest_errors.NewInternalServerError("invalid restclient response when trying to login user", errors.New("restclient error"))
 	}
 	if response.StatusCode > 299 {
-		apiErr, err := rest_errors.NewRestErrorFromBytes(response.Bytes())
-	
+		apiErr, err := rest_errors.NewRestErrorFromBytes(response.Bytes())		
 		if err != nil {
 			return nil,  rest_errors.NewInternalServerError("invalid error interface when trying to login user", err)
 		}
